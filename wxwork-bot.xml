@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Agent>
+  <Name>企业微信机器人</Name>
+  <Variables>
+    <Variable Help="企业微信机器人的Webhook URL（在企业微信群中创建机器人后获取）[br][br]
+        1. 在企业微信中创建机器人[br]
+        2. 复制Webhook URL到此字段[br]
+        3. 点击测试按钮验证配置[br][br]
+        * Webhook URL格式: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY" Desc="Webhook URL" Default="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY">WebhookUrl</Variable>
+    <Variable Help="Specify the fields which are included in the title of the notification." Desc="Notification Title" Default="$SUBJECT">TITLE</Variable>
+    <Variable Help="Specify the fields which are included in the message body of the notification." Desc="Notification Message" Default="$DESCRIPTION">MESSAGE</Variable>
+  </Variables>
+  <Script>
+    <![CDATA[
+    #!/bin/bash
+    ############
+    # 企业微信机器人通知脚本
+    ############
+    # 企业微信机器人通知
+    TITLE=$(echo -e "$SUBJECT")
+    MESSAGE=$(echo -e "$DESCRIPTION")
+    WEBHOOK_URL=$(echo -e "$WebhookUrl")
+    
+    # 翻译函数：英文转中文
+    translate_to_chinese() {
+        local text="$1"
+        
+        # 处理特殊情况和常见Unraid通知模式
+        case "$text" in
+            "unbalanced - COPY operation completed")
+                echo "阵列不平衡 - COPY操作已完成"
+                ;;
+            "No description")
+                echo "无详细描述"
+                ;;
+            "A new version of "*" is available")
+                local container=$(echo "$text" | sed 's/A new version of \(.*\) is available/\1/')
+                echo "有新版本的 $container 可用"
+                ;;
+            "Docker - "*" ["*"]")
+                local container=$(echo "$text" | sed 's/Docker - \(.*\) \[.*\]/\1/')
+                echo "Docker - $container [新版本可用]"
+                ;;
+            "Notice ["*"] - Version update "*)
+                local app=$(echo "$text" | sed 's/Notice \[\(.*\)\] - Version update .*/\1/')
+                echo "通知 [$app] - 版本更新"
+                ;;
+            "Warning ["*"] - temperature celsius (failing now) is "*)
+                local disk=$(echo "$text" | sed 's/Warning \[\(.*\)\] - temperature celsius (failing now) is .*/\1/')
+                local temp=$(echo "$text" | sed 's/.*is \([0-9]*\).*/\1/')
+                echo "警告 [$disk] - 温度已达到 $temp°C (即将故障)"
+                ;;
+            *)
+                # 通用关键词替换
+                local translated=$(echo "$text" | sed \
+                    -e 's/error/错误/g' \
+                    -e 's/warning/警告/g' \
+                    -e 's/info/信息/g' \
+                    -e 's/success/成功/g' \
+                    -e 's/failed/失败/g' \
+                    -e 's/started/已启动/g' \
+                    -e 's/stopped/已停止/g' \
+                    -e 's/completed/已完成/g' \
+                    -e 's/disk/磁盘/g' \
+                    -e 's/array/阵列/g' \
+                    -e 's/parity/校验/g' \
+                    -e 's/notification/通知/g' \
+                    -e 's/system/系统/g' \
+                    -e 's/server/服务器/g' \
+                    -e 's/unbalanced/不平衡/g' \
+                    -e 's/COPY/复制/g' \
+                    -e 's/operation/操作/g' \
+                    -e 's/No description/无详细描述/g' \
+                    -e 's/Docker/Docker/g' \
+                    -e 's/version/版本/g' \
+                    -e 's/available/可用/g' \
+                    -e 's/new/新/g' \
+                    -e 's/update/更新/g' \
+                    -e 's/Notice/通知/g' \
+                    -e 's/Unraid/Unraid/g')
+                echo "$translated"
+                ;;
+        esac
+    }
+    
+    # 翻译标题和消息内容
+    TITLE=$(translate_to_chinese "$TITLE")
+    MESSAGE=$(translate_to_chinese "$MESSAGE")
+    
+    # 测试模式检测
+    if [[ "$1" == "test" ]]; then
+        TITLE="测试通知"
+        MESSAGE="这是一条来自Unraid系统的测试通知，用于验证企业微信机器人配置是否正确。"
+    fi
+  
+    # 发送消息到企业微信机器人
+    send_message() {
+        local message="🚨 Unraid系统通知\n\n📋 主题: $TITLE\n📝 内容: $MESSAGE\n\n💻 来自您的Unraid服务器"
+        
+        # 构建JSON数据
+        local json_data="{
+            \"msgtype\": \"text\",
+            \"text\": {
+                \"content\": \"$message\"
+            }
+        }"
+        
+        # 发送请求并返回结果
+        curl -s -H "Content-Type: application/json" -X POST \
+            "$WEBHOOK_URL" \
+            -d "$json_data"
+    }
+  
+    # 调用发送消息函数
+    send_message
+    ]]>
+  </Script>
+</Agent>
