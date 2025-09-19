@@ -11,8 +11,7 @@
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" min="6.12.999" support="https://github.com/gldl137/wechat-work-bot/">
 
 <CHANGES>
-###2024.09.19
-- 修复重启失效问题
+###2025.09.19
 - 添加企业微信机器人支持
 </CHANGES>
 
@@ -41,3 +40,4 @@ rm -f /usr/local/emhttp/plugins/dynamix/icons/awxwork-bot.png
 </FILE> 
 
 </PLUGIN>
+
