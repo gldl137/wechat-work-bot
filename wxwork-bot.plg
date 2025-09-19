@@ -1,0 +1,41 @@
+<?xml version='1.0' standalone='yes'?>
+<!DOCTYPE PLUGIN [
+<!ENTITY name      "wxwork-bot">
+<!ENTITY version   "2024.09.19">
+<!ENTITY launch    "Notifications">
+<!ENTITY author    "Andrew Zawadzki/Alimighty.Yantao">
+<!ENTITY github    "gldl137/wechat-work-bot">
+<!ENTITY pluginURL "/boot/config/plugins/wechat-work/企业微信机器人.plg">
+]>
+
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="/boot/config/plugins/wechat-work/wxwork-bot.plg" min="6.12.999" support="https://forums.unraid.net/topic/167792-%E6%8F%92%E4%BB%B6-%E5%BE%AE%E4%BF%A1%E9%80%9A%E7%9F%A5-plugin-wechat-notifications/">
+
+<CHANGES>
+###2024.09.19
+- 添加企业微信机器人支持
+</CHANGES>
+
+<!--
+The 'source' file.
+-->
+<FILE Name="/usr/local/emhttp/plugins/dynamix/agents/wxwork-bot.xml">
+<URL>https://raw.githubusercontent.com/gldl137/wechat-work-bot/main/wxwork-bot.xml</URL>
+</FILE>
+
+<!--
+The icon file.
+-->
+<FILE Name="/usr/local/emhttp/plugins/dynamix/icons/企业微信机器人.png">
+<URL>https://raw.githubusercontent.com/gldl137/wechat-work-bot/main/企业微信机器人.png</URL>
+</FILE>
+
+<!--
+The 'remove' script.
+-->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+rm -f /usr/local/emhttp/plugins/dynamix/agents/wxwork-bot.xml
+rm -f /usr/local/emhttp/plugins/dynamix/icons/企业微信机器人.png
+</INLINE>
+</FILE> 
+</PLUGIN>
