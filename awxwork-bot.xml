@@ -45,6 +45,11 @@
                 local app=$(echo "$text" | sed 's/Notice \[\(.*\)\] - Version update .*/\1/')
                 echo "通知 [$app] - 版本更新"
                 ;;
+            "Warning ["*"] - temperature celsius (failing now) is "*)
+                local disk=$(echo "$text" | sed 's/Warning \[\(.*\)\] - temperature celsius (failing now) is .*/\1/')
+                local temp=$(echo "$text" | sed 's/.*is \([0-9]*\).*/\1/')
+                echo "警告 [$disk] - 温度已达到 $temp°C (即将故障)"
+                ;;
             *)
                 # 通用关键词替换
                 local translated=$(echo "$text" | sed \
